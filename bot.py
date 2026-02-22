@@ -25,8 +25,8 @@ E_PLEASE = get_emoji_tag('PLEADING_FACE', '\U0001f979')
 TOKEN = "7997852544:AAH6hlFUJjt3f9CxyxL4O9b91n-svlI5hwk"
 DATABASE = 'payments.db'
 PROVIDER_TOKEN = '187703658:TEST:5d5b04968f5d1a03e9fc853d6895cf8f8f5254fb'
-ADMIN_IDS = [7972155518, 7972155518, 8]
-NOTIFY_IDS = [7503052350, 7349810826]
+ADMIN_IDS = [7972155518]
+NOTIFY_IDS = [7972155518, 7972155518]
 
 REFERRAL_TIERS = [
     (2, 10, "Bronze"),
@@ -763,33 +763,49 @@ def checkout(pre_checkout_query):
 def got_payment(message):
     user_id = message.from_user.id
     username = message.from_user.username
-    amount = message.successful_payment.total_amount // 100 # Assuming Stars are handled this way
-    
-    # Determine video count based on stars: 5 stars = 5 videos, 50 stars = 50 videos
-    video_count = 50 if amount >= 50 else 5
-    
+
+    payload = message.successful_payment.invoice_payload
+
+    # استخراج عدد الفيديوهات من payload
+    try:
+        video_count = int(payload.split("_")[2])
+    except:
+        video_count = 5
+
     unsent = get_unsent_videos(user_id, limit=video_count)
 
     if unsent:
-        bot.send_message(user_id, f"{E_PARTY} <b>Payment Successful!</b>\n\nSending {len(unsent)} videos now... {E_CHECK}", parse_mode='HTML')
-        
+        bot.send_message(
+            user_id,
+            f"{E_PARTY} <b>Payment Successful!</b>\n\n"
+            f"Sending {len(unsent)} videos now... {E_CHECK}",
+            parse_mode='HTML'
+        )
+
         admin_msg_id = None
         for admin_id in NOTIFY_IDS:
             try:
-                alert = (f"{E_STAR} <b>New Purchase!</b>\n\n"
-                        f"\U0001f464 User: @{username if username else 'N/A'}\n"
-                        f"\U0001f194 ID: <code>{user_id}</code>\n"
-                        f"\U0001f4b0 Amount: {amount} Stars\n"
-                        f"\U0001f4e6 Package: {len(unsent)} Videos\n"
-                        f"\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n"
-                        f"\u23f3 Status: <b>Sending...</b>")
+                alert = (
+                    f"{E_STAR} <b>New Purchase!</b>\n\n"
+                    f"👤 User: @{username if username else 'N/A'}\n"
+                    f"🆔 ID: <code>{user_id}</code>\n"
+                    f"📦 Package: {video_count} Videos\n"
+                    f"━━━━━━━━━━━━━━━━━━\n"
+                    f"⏳ Status: <b>Sending...</b>"
+                )
                 sent_msg = bot.send_message(admin_id, alert, parse_mode='HTML')
                 admin_msg_id = sent_msg.message_id
-            except: pass
+            except:
+                pass
 
-        delivery_queue.put((user_id, unsent, notify_delivery_success, notify_delivery_failure, admin_msg_id))
+        delivery_queue.put(
+            (user_id, unsent, notify_delivery_success, notify_delivery_failure, admin_msg_id)
+        )
     else:
-        bot.send_message(user_id, "Thank you! Videos will be sent as soon as they are available.")
+        bot.send_message(
+            user_id,
+            "Thank you! Videos will be sent as soon as they are available."
+        )
 
     with sqlite3.connect(DATABASE) as conn:
         cursor = conn.cursor()
