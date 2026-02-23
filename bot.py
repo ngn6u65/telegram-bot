@@ -25,7 +25,7 @@ E_MONEY = get_emoji_tag('MONEY_BAG', '💰')
 E_SPARKLES = get_emoji_tag('SPARKLES', '✨')
 E_MEDAL = get_emoji_tag('MEDAL', '🏅')
 
-TOKEN = "7997852544:AAH6hlFUJjt3f9CxyxL4O9b91n-svlI5hwk"
+TOKEN = "6033133449:AAGAvcK5Y7xe_Ev8LOdpYcf5Upa2z-NxUv0"
 DATABASE = 'payments.db'
 PROVIDER_TOKEN = '187703658:TEST:5d5b04968f5d1a03e9fc853d6895cf8f8f5254fb'
 ADMIN_IDS = [7972155518]
