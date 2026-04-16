@@ -57,6 +57,18 @@ def home():
 def health():
     return "OK", 200
 
+@app.errorhandler(404)
+def not_found(e):
+    return {"error": "Not found"}, 404
+
+@app.errorhandler(405)
+def method_not_allowed(e):
+    return {"error": "Method not allowed"}, 405
+
+@app.errorhandler(500)
+def internal_error(e):
+    return {"error": "Internal server error"}, 500
+
 def run_flask():
     app.run(host='0.0.0.0', port=5000)
 
@@ -359,9 +371,14 @@ def language_keyboard():
     )
     return keyboard
 
+SUPPORTED_LANGUAGES = ['en', 'ru', 'hi', 'es', 'de', 'pt']
+
 @bot.callback_query_handler(func=lambda call: call.data.startswith("set_lang_"))
 def handle_set_lang(call):
     lang = call.data.replace("set_lang_", "")
+    if lang not in SUPPORTED_LANGUAGES:
+        bot.answer_callback_query(call.id, "Unsupported language.", show_alert=True)
+        return
     set_user_language(call.from_user.id, lang)
     bot.answer_callback_query(call.id, f"Language set to {lang}!")
     handle_back_to_start(call)
@@ -574,26 +591,30 @@ def handle_offer_command(message):
         parse_mode='HTML'
     )
 
+STARS_MAP = {
+    7: 7,
+    65: 65,
+    120: 100,
+    350: 250,
+    750: 500,
+    1600: 1000
+}
+
 @bot.callback_query_handler(func=lambda call: call.data.startswith("buy_"))
 def handle_payment_request(call):
     user_id = call.from_user.id
     try:
         count = int(call.data.replace("buy_", ""))
     except ValueError:
+        bot.answer_callback_query(call.id, "Invalid package selection.", show_alert=True)
         return
 
-    # Map video counts to Star prices
-    stars_map = {
-        7: 7,
-        65: 65,
-        120: 100,
-        350: 250,
-        750: 500,
-        1600: 1000
-    }
-    
-    stars_price = stars_map.get(count, count)
-    
+    if count not in STARS_MAP:
+        bot.answer_callback_query(call.id, "This package is not available.", show_alert=True)
+        return
+
+    stars_price = STARS_MAP[count]
+
     prices = [types.LabeledPrice(label=f"{count} Videos", amount=stars_price)]
     bot.send_invoice(
         call.message.chat.id,
@@ -646,12 +667,6 @@ def handle_referral_menu(call):
         keyboard.add(styled_button(get_string('claim_rewards', lang), callback_data="claim_rewards", style="danger"))
 
     keyboard.add(styled_button(get_string('back_to_start', lang), callback_data="back_to_start", style="primary"))
-
-    try:
-        bot.edit_message_text(text, call.message.chat.id, call.message.message_id, reply_markup=keyboard, parse_mode='HTML')
-    except:
-        try: bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id, reply_markup=keyboard)
-        except: pass
 
     try:
         bot.edit_message_text(text, call.message.chat.id, call.message.message_id, reply_markup=keyboard, parse_mode='HTML')
@@ -714,38 +729,6 @@ def handle_claim_rewards(call):
                 f"\U0001f3c6 Tiers: {', '.join([n for n, _ in tiers_claimed_now])}",
                 parse_mode='HTML')
         except: pass
-
-@bot.callback_query_handler(func=lambda call: call.data.startswith("buy_"))
-def handle_payment_request(call):
-    user_id = call.from_user.id
-    try:
-        count = int(call.data.replace("buy_", ""))
-    except ValueError:
-        return
-
-    # Map video counts to Star prices
-    stars_map = {
-        7: 7,
-        65: 65,
-        120: 100,
-        350: 250,
-        750: 500,
-        1600: 1000
-    }
-    
-    stars_price = stars_map.get(count, count)
-    
-    prices = [types.LabeledPrice(label=f"{count} Videos", amount=stars_price)]
-    bot.send_invoice(
-        call.message.chat.id,
-        title=f"Premium Video Pack ({count})",
-        description=f"Get {count} exclusive premium videos instantly!",
-        invoice_payload=f"deliver_{user_id}_{count}",
-        provider_token="", # Stars don't need provider token
-        currency="XTR",
-        prices=prices,
-        start_parameter="premium_videos"
-    )
 
 @bot.callback_query_handler(func=lambda call: call.data == "leaderboard")
 def handle_leaderboard(call):
@@ -872,7 +855,9 @@ def handle_check_referral(message):
 
 @bot.message_handler(commands=['logs'])
 def handle_view_logs(message):
-    if not is_admin(message.from_user.id): return
+    if not is_admin(message.from_user.id):
+        bot.reply_to(message, "\u26d4 You are not authorized to use this command.")
+        return
     try:
         with sqlite3.connect(DATABASE) as conn:
             cursor = conn.cursor()
@@ -901,7 +886,9 @@ def handle_view_logs(message):
 
 @bot.message_handler(commands=['buyers'])
 def handle_buyers_list(message):
-    if not is_admin(message.from_user.id): return
+    if not is_admin(message.from_user.id):
+        bot.reply_to(message, "\u26d4 You are not authorized to use this command.")
+        return
     with sqlite3.connect(DATABASE) as conn:
         cursor = conn.cursor()
         cursor.execute('''
@@ -927,6 +914,18 @@ def handle_buyers_list(message):
 
 @bot.pre_checkout_query_handler(func=lambda query: True)
 def checkout(pre_checkout_query):
+    payload = pre_checkout_query.invoice_payload
+    if not payload or not payload.startswith("deliver_"):
+        bot.answer_pre_checkout_query(pre_checkout_query.id, ok=False, error_message="Invalid payment payload.")
+        return
+    parts = payload.split('_')
+    if len(parts) != 3 or not parts[1].isdigit() or not parts[2].isdigit():
+        bot.answer_pre_checkout_query(pre_checkout_query.id, ok=False, error_message="Malformed payment payload.")
+        return
+    count = int(parts[2])
+    if count not in STARS_MAP:
+        bot.answer_pre_checkout_query(pre_checkout_query.id, ok=False, error_message="Invalid video package.")
+        return
     bot.answer_pre_checkout_query(pre_checkout_query.id, ok=True)
 
 @bot.message_handler(content_types=['successful_payment'])
@@ -935,48 +934,61 @@ def got_payment(message):
     lang = get_user_language(user_id)
     payload = message.successful_payment.invoice_payload
     username = message.from_user.username
-    if payload.startswith("deliver_"):
-        parts = payload.split('_')
-        count = int(parts[2])
-        unsent = get_unsent_videos(user_id, limit=count)
-        if unsent:
-            bot.send_message(user_id, get_string('payment_success', lang, count=len(unsent)), parse_mode='HTML')
+    if not payload or not payload.startswith("deliver_"):
+        bot.send_message(user_id, "\u26a0\ufe0f Payment received but the order could not be processed. Please contact support.", parse_mode='HTML')
+        return
+    parts = payload.split('_')
+    if len(parts) != 3 or not parts[1].isdigit() or not parts[2].isdigit():
+        bot.send_message(user_id, "\u26a0\ufe0f Payment received but the order details are invalid. Please contact support.", parse_mode='HTML')
+        return
+    count = int(parts[2])
+    if count <= 0:
+        bot.send_message(user_id, "\u26a0\ufe0f Invalid video count in order. Please contact support.", parse_mode='HTML')
+        return
+    unsent = get_unsent_videos(user_id, limit=count)
+    if not unsent:
+        bot.send_message(user_id, "\u26a0\ufe0f Payment received but no videos are currently available. Please contact support for a refund.", parse_mode='HTML')
+        return
 
-            admin_msg_id = None
+    bot.send_message(user_id, get_string('payment_success', lang, count=len(unsent)), parse_mode='HTML')
+
+    admin_msg_id = None
+    for admin_id in NOTIFY_IDS:
+        try:
+            alert = (f"{E_STAR} <b>New Purchase!</b>\n\n"
+                    f"\U0001f464 User: @{escape_html(username) if username else 'N/A'}\n"
+                    f"\U0001f194 ID: <code>{user_id}</code>\n"
+                    f"\U0001f4b0 Amount: {message.successful_payment.total_amount} {message.successful_payment.currency}\n"
+                    f"\U0001f4e6 Package: {len(unsent)} Videos\n"
+                    f"\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n"
+                    f"\u23f3 Status: <b>Starting delivery...</b>")
+            sent_msg = bot.send_message(admin_id, alert, parse_mode='HTML')
+            admin_msg_id = sent_msg.message_id
+        except: pass
+
+    delivery_queue.put((user_id, unsent, notify_delivery_success, notify_delivery_failure, admin_msg_id))
+
+    with sqlite3.connect(DATABASE) as conn:
+        cursor = conn.cursor()
+        cursor.execute('INSERT OR IGNORE INTO payments (user_id, payment_id, amount, currency) VALUES (?, ?, ?, ?)',
+                     (user_id, message.successful_payment.telegram_payment_charge_id,
+                      message.successful_payment.total_amount, message.successful_payment.currency))
+        conn.commit()
+
+    if update_user_milestone(user_id, message.successful_payment.total_amount):
+        bonus_vids = get_unsent_videos(user_id, limit=100)
+        if bonus_vids:
+            bot.send_message(user_id, f"\U0001f38a <b>CONGRATULATIONS!</b> \U0001f38a\n\nYou reached <b>750 Stars</b> milestone! \U0001f3c6\nHere are <b>100 BONUS Premium Videos</b> just for you! {E_HEART}", parse_mode='HTML')
+            delivery_queue.put((user_id, bonus_vids, notify_delivery_success, notify_delivery_failure, None))
             for admin_id in NOTIFY_IDS:
-                try:
-                    alert = (f"{E_STAR} <b>New Purchase!</b>\n\n"
-                            f"\U0001f464 User: @{username if username else 'N/A'}\n"
-                            f"\U0001f194 ID: <code>{user_id}</code>\n"
-                            f"\U0001f4b0 Amount: {message.successful_payment.total_amount} {message.successful_payment.currency}\n"
-                            f"\U0001f4e6 Package: {len(unsent)} Videos\n"
-                            f"\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n"
-                            f"\u23f3 Status: <b>Starting delivery...</b>")
-                    sent_msg = bot.send_message(admin_id, alert, parse_mode='HTML')
-                    admin_msg_id = sent_msg.message_id
+                try: bot.send_message(admin_id, f"\U0001f3c6 User {user_id} reached 750 Stars milestone and received 100 bonus videos!")
                 except: pass
-
-            delivery_queue.put((user_id, unsent, notify_delivery_success, notify_delivery_failure, admin_msg_id))
-
-            with sqlite3.connect(DATABASE) as conn:
-                cursor = conn.cursor()
-                cursor.execute('INSERT OR IGNORE INTO payments (user_id, payment_id, amount, currency) VALUES (?, ?, ?, ?)',
-                             (user_id, message.successful_payment.telegram_payment_charge_id,
-                              message.successful_payment.total_amount, message.successful_payment.currency))
-                conn.commit()
-
-            if update_user_milestone(user_id, message.successful_payment.total_amount):
-                bonus_vids = get_unsent_videos(user_id, limit=100)
-                if bonus_vids:
-                    bot.send_message(user_id, f"\U0001f38a <b>CONGRATULATIONS!</b> \U0001f38a\n\nYou reached <b>750 Stars</b> milestone! \U0001f3c6\nHere are <b>100 BONUS Premium Videos</b> just for you! {E_HEART}", parse_mode='HTML')
-                    delivery_queue.put((user_id, bonus_vids, notify_delivery_success, notify_delivery_failure, None))
-                    for admin_id in NOTIFY_IDS:
-                        try: bot.send_message(admin_id, f"\U0001f3c6 User {user_id} reached 750 Stars milestone and received 100 bonus videos!")
-                        except: pass
 
 @bot.message_handler(commands=['db_debug'])
 def handle_db_debug(message):
-    if not is_admin(message.from_user.id): return
+    if not is_admin(message.from_user.id):
+        bot.reply_to(message, "\u26d4 You are not authorized to use this command.")
+        return
     try:
         with sqlite3.connect(DATABASE) as conn:
             cursor = conn.cursor()
@@ -1000,13 +1012,17 @@ def handle_db_debug(message):
 
 @bot.message_handler(commands=['users_count'])
 def handle_users_count(message):
-    if not is_admin(message.from_user.id): return
+    if not is_admin(message.from_user.id):
+        bot.reply_to(message, "\u26d4 You are not authorized to use this command.")
+        return
     count = get_total_users()
     bot.reply_to(message, f"\U0001f4ca <b>User Count</b>\n\n\U0001f465 Total registered users: <code>{count}</code>", parse_mode='HTML')
 
 @bot.message_handler(commands=['add'])
 def handle_add_video(message):
-    if not is_admin(message.from_user.id): return
+    if not is_admin(message.from_user.id):
+        bot.reply_to(message, "\u26d4 You are not authorized to use this command.")
+        return
     ADMIN_STATES[message.from_user.id] = 'WAITING_VIDEO'
     bot.send_message(message.chat.id, "\U0001f4e4 Send the videos you want to add. Type /done when finished.")
 
@@ -1027,13 +1043,17 @@ def handle_video_upload(message):
 
 @bot.message_handler(commands=['done'])
 def handle_done(message):
-    if not is_admin(message.from_user.id): return
+    if not is_admin(message.from_user.id):
+        bot.reply_to(message, "\u26d4 You are not authorized to use this command.")
+        return
     ADMIN_STATES[message.from_user.id] = None
     bot.send_message(message.chat.id, f"{E_CHECK} Upload session finished.")
 
 @bot.message_handler(commands=['videos'])
 def handle_videos_list(message):
-    if not is_admin(message.from_user.id): return
+    if not is_admin(message.from_user.id):
+        bot.reply_to(message, "\u26d4 You are not authorized to use this command.")
+        return
     with sqlite3.connect(DATABASE) as conn:
         cursor = conn.cursor()
         total_vids = cursor.execute('SELECT COUNT(*) FROM videos').fetchone()[0]
@@ -1052,7 +1072,9 @@ def handle_videos_list(message):
 
 @bot.message_handler(commands=['stats'])
 def handle_admin_stats(message):
-    if not is_admin(message.from_user.id): return
+    if not is_admin(message.from_user.id):
+        bot.reply_to(message, "\u26d4 You are not authorized to use this command.")
+        return
     with sqlite3.connect(DATABASE) as conn:
         cursor = conn.cursor()
         total_users = cursor.execute('SELECT COUNT(*) FROM users').fetchone()[0]
@@ -1071,12 +1093,17 @@ def handle_admin_stats(message):
 
 @bot.message_handler(commands=['ban'])
 def handle_ban_command(message):
-    if not is_admin(message.from_user.id): return
+    if not is_admin(message.from_user.id):
+        bot.reply_to(message, "\u26d4 You are not authorized to use this command.")
+        return
+    args = message.text.split()
+    if len(args) < 2:
+        bot.reply_to(message, "Usage: /ban <user_id>")
+        return
+    if not args[1].isdigit() or int(args[1]) <= 0:
+        bot.reply_to(message, "\u26a0\ufe0f Invalid user ID. Must be a positive integer.")
+        return
     try:
-        args = message.text.split()
-        if len(args) < 2:
-            bot.reply_to(message, "Usage: /ban <user_id>")
-            return
         target_id = int(args[1])
         ban_user(target_id)
         bot.reply_to(message, f"\u2705 User {target_id} has been banned.")
@@ -1086,12 +1113,17 @@ def handle_ban_command(message):
 
 @bot.message_handler(commands=['unban'])
 def handle_unban_command(message):
-    if not is_admin(message.from_user.id): return
+    if not is_admin(message.from_user.id):
+        bot.reply_to(message, "\u26d4 You are not authorized to use this command.")
+        return
+    args = message.text.split()
+    if len(args) < 2:
+        bot.reply_to(message, "Usage: /unban <user_id>")
+        return
+    if not args[1].isdigit() or int(args[1]) <= 0:
+        bot.reply_to(message, "\u26a0\ufe0f Invalid user ID. Must be a positive integer.")
+        return
     try:
-        args = message.text.split()
-        if len(args) < 2:
-            bot.reply_to(message, "Usage: /unban <user_id>")
-            return
         target_id = int(args[1])
         unban_user(target_id)
         bot.reply_to(message, f"\u2705 User {target_id} has been unbanned.")
@@ -1101,11 +1133,19 @@ def handle_unban_command(message):
 
 @bot.message_handler(commands=['send_v'])
 def handle_send_v(message):
-    if not is_admin(message.from_user.id): return
+    if not is_admin(message.from_user.id):
+        bot.reply_to(message, "\u26d4 You are not authorized to use this command.")
+        return
     try:
         args = message.text.split()
         if len(args) < 3:
             bot.reply_to(message, "Usage: /send_v <user_id> <count>")
+            return
+        if not args[1].isdigit() or int(args[1]) <= 0:
+            bot.reply_to(message, "\u26a0\ufe0f Invalid user ID. Must be a positive integer.")
+            return
+        if not args[2].isdigit() or int(args[2]) <= 0:
+            bot.reply_to(message, "\u26a0\ufe0f Invalid count. Must be a positive integer.")
             return
         target_id = int(args[1])
         video_count = int(args[2])
@@ -1126,7 +1166,9 @@ def handle_send_v(message):
 
 @bot.message_handler(commands=['top_referrers'])
 def handle_top_referrers(message):
-    if not is_admin(message.from_user.id): return
+    if not is_admin(message.from_user.id):
+        bot.reply_to(message, "\u26d4 You are not authorized to use this command.")
+        return
     leaders = get_referral_leaderboard(20)
 
     if not leaders:
@@ -1142,13 +1184,18 @@ def handle_top_referrers(message):
 
 @bot.message_handler(commands=['broadcast_all'])
 def handle_broadcast(message):
-    if not is_admin(message.from_user.id): return
+    if not is_admin(message.from_user.id):
+        bot.reply_to(message, "\u26d4 You are not authorized to use this command.")
+        return
     args = message.text.split(maxsplit=1)
     if len(args) < 2:
         bot.reply_to(message, "Usage: /broadcast_all <message>")
         return
 
-    broadcast_text = args[1]
+    broadcast_text = args[1].strip()
+    if not broadcast_text:
+        bot.reply_to(message, "\u26a0\ufe0f Broadcast message cannot be empty.")
+        return
     conn = sqlite3.connect(DATABASE)
     users = [r[0] for r in conn.execute('SELECT user_id FROM users').fetchall()]
     conn.close()
@@ -1167,7 +1214,9 @@ def handle_broadcast(message):
 
 @bot.message_handler(commands=['promo'])
 def handle_promo(message):
-    if not is_admin(message.from_user.id): return
+    if not is_admin(message.from_user.id):
+        bot.reply_to(message, "\u26d4 You are not authorized to use this command.")
+        return
 
     fire_line = "\U0001f525" * 10
     star_line = "\u2b50" * 10
