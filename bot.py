@@ -3,12 +3,16 @@ from telebot import types
 import sqlite3
 import os
 import time
+import logging
 from flask import Flask
 from threading import Thread
 
 from premium_emojis import get_emoji_tag
 
 from i18n import get_string
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 E_HAND = get_emoji_tag('WAVE', '👋')
 E_HEART = get_emoji_tag('HEART_RED', '❤️')
@@ -25,11 +29,22 @@ E_MONEY = get_emoji_tag('MONEY_BAG', '💰')
 E_SPARKLES = get_emoji_tag('SPARKLES', '✨')
 E_MEDAL = get_emoji_tag('MEDAL', '🏅')
 
-TOKEN = "6033133449:AAGAvcK5Y7xe_Ev8LOdpYcf5Upa2z-NxUv0"
-DATABASE = 'payments.db'
-PROVIDER_TOKEN = '187703658:TEST:5d5b04968f5d1a03e9fc853d6895cf8f8f5254fb'
-ADMIN_IDS = [7972155518]
-NOTIFY_IDS = [7972155518]
+TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN', '')
+if not TOKEN:
+    raise RuntimeError('TELEGRAM_BOT_TOKEN environment variable is not set')
+DATABASE = os.environ.get('DATABASE_PATH', 'payments.db')
+PROVIDER_TOKEN = os.environ.get('PROVIDER_TOKEN', '')
+
+def _parse_id_list(env_var, default=''):
+    raw = os.environ.get(env_var, default)
+    if not raw:
+        return []
+    return [int(x.strip()) for x in raw.split(',') if x.strip().isdigit()]
+
+ADMIN_IDS = _parse_id_list('ADMIN_IDS')
+NOTIFY_IDS = _parse_id_list('NOTIFY_IDS')
+
+SUPPORTED_LANGUAGES = {'en', 'ru', 'hi', 'es', 'de', 'pt'}
 
 REFERRAL_TIERS = [
     (2, 5, "Bronze"),
@@ -58,10 +73,10 @@ def health():
     return "OK", 200
 
 def run_flask():
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='127.0.0.1', port=int(os.environ.get('FLASK_PORT', '5000')))
 
 def init_db():
-    print(f"DEBUG: Initializing database at {os.path.abspath(DATABASE)}")
+    logger.info("Initializing database")
     with sqlite3.connect(DATABASE) as conn:
         cursor = conn.cursor()
         cursor.execute('''CREATE TABLE IF NOT EXISTS users (user_id INTEGER PRIMARY KEY, username TEXT, language TEXT DEFAULT 'en', last_seen TIMESTAMP DEFAULT CURRENT_TIMESTAMP)''')
@@ -132,7 +147,7 @@ def save_user(user_id, username):
             cursor.execute('COMMIT')
         except Exception as e:
             cursor.execute('ROLLBACK')
-            print(f"Error saving user: {e}")
+            logger.error("Error saving user: %s", e)
     if is_new:
         for admin_id in NOTIFY_IDS:
             try:
@@ -210,7 +225,7 @@ def save_video(file_id, file_name=None, file_size=None, duration=None):
             conn.commit()
             return cursor.lastrowid
     except Exception as e:
-        print(f"DB error save_video: {e}")
+        logger.error("DB error save_video: %s", e)
         return None
 
 def get_unsent_videos(user_id, limit=50):
@@ -250,7 +265,7 @@ def get_unsent_videos(user_id, limit=50):
                 
             return videos[:limit]
     except Exception as e:
-        print(f"DB error get_unsent_videos: {e}")
+        logger.error("DB error get_unsent_videos: %s", e)
         return []
 
 def save_sent_video(user_id, video_id):
@@ -260,7 +275,7 @@ def save_sent_video(user_id, video_id):
             cursor.execute('INSERT OR IGNORE INTO sent_videos (user_id, video_id) VALUES (?, ?)', (user_id, video_id))
             conn.commit()
     except Exception as e:
-        print(f"DB error save_sent_video: {e}")
+        logger.error("DB error save_sent_video: %s", e)
 
 import queue
 import threading
@@ -301,7 +316,7 @@ def process_delivery(task):
                             )
                         except: pass
             except Exception as e:
-                print(f"Worker error: {e}")
+                logger.error("Worker error: %s", e)
                 if "blocked" in str(e).lower(): break
 
         if admin_msg_id:
@@ -321,7 +336,7 @@ def process_delivery(task):
         else:
             if failure_callback: failure_callback(user_id)
     except Exception as e:
-        print(f"Delivery worker error: {e}")
+        logger.error("Delivery worker error: %s", e)
 
 def delivery_dispatcher():
     while True:
@@ -330,7 +345,7 @@ def delivery_dispatcher():
             delivery_pool.submit(process_delivery, task)
             delivery_queue.task_done()
         except Exception as e:
-            print(f"Dispatcher error: {e}")
+            logger.error("Dispatcher error: %s", e)
 
 threading.Thread(target=delivery_dispatcher, daemon=True).start()
 
@@ -362,6 +377,9 @@ def language_keyboard():
 @bot.callback_query_handler(func=lambda call: call.data.startswith("set_lang_"))
 def handle_set_lang(call):
     lang = call.data.replace("set_lang_", "")
+    if lang not in SUPPORTED_LANGUAGES:
+        bot.answer_callback_query(call.id, "Unsupported language.")
+        return
     set_user_language(call.from_user.id, lang)
     bot.answer_callback_query(call.id, f"Language set to {lang}!")
     handle_back_to_start(call)
@@ -432,7 +450,7 @@ def log_admin_action(admin_id, action, target_id=None, details=None):
                          (admin_id, action, target_id, details))
             conn.commit()
     except Exception as e:
-        print(f"Error logging admin action: {e}")
+        logger.error("Error logging admin action: %s", e)
 
 def build_referral_progress(ref_count, claimed_tiers):
     lines = []
@@ -715,38 +733,6 @@ def handle_claim_rewards(call):
                 parse_mode='HTML')
         except: pass
 
-@bot.callback_query_handler(func=lambda call: call.data.startswith("buy_"))
-def handle_payment_request(call):
-    user_id = call.from_user.id
-    try:
-        count = int(call.data.replace("buy_", ""))
-    except ValueError:
-        return
-
-    # Map video counts to Star prices
-    stars_map = {
-        7: 7,
-        65: 65,
-        120: 100,
-        350: 250,
-        750: 500,
-        1600: 1000
-    }
-    
-    stars_price = stars_map.get(count, count)
-    
-    prices = [types.LabeledPrice(label=f"{count} Videos", amount=stars_price)]
-    bot.send_invoice(
-        call.message.chat.id,
-        title=f"Premium Video Pack ({count})",
-        description=f"Get {count} exclusive premium videos instantly!",
-        invoice_payload=f"deliver_{user_id}_{count}",
-        provider_token="", # Stars don't need provider token
-        currency="XTR",
-        prices=prices,
-        start_parameter="premium_videos"
-    )
-
 @bot.callback_query_handler(func=lambda call: call.data == "leaderboard")
 def handle_leaderboard(call):
     lang = get_user_language(call.from_user.id)
@@ -937,6 +923,9 @@ def got_payment(message):
     username = message.from_user.username
     if payload.startswith("deliver_"):
         parts = payload.split('_')
+        if len(parts) < 3 or not parts[2].isdigit():
+            logger.warning("Malformed payment payload: %s", payload)
+            return
         count = int(parts[2])
         unsent = get_unsent_videos(user_id, limit=count)
         if unsent:
@@ -996,7 +985,8 @@ def handle_db_debug(message):
 
         bot.reply_to(message, text, parse_mode='HTML')
     except Exception as e:
-        bot.reply_to(message, f"Error: {e}")
+        logger.error("db_debug error: %s", e)
+        bot.reply_to(message, "An error occurred while fetching debug info.")
 
 @bot.message_handler(commands=['users_count'])
 def handle_users_count(message):
@@ -1148,10 +1138,9 @@ def handle_broadcast(message):
         bot.reply_to(message, "Usage: /broadcast_all <message>")
         return
 
-    broadcast_text = args[1]
-    conn = sqlite3.connect(DATABASE)
-    users = [r[0] for r in conn.execute('SELECT user_id FROM users').fetchall()]
-    conn.close()
+    broadcast_text = escape_html(args[1])
+    with sqlite3.connect(DATABASE) as conn:
+        users = [r[0] for r in conn.execute('SELECT user_id FROM users').fetchall()]
 
     success, fail = 0, 0
     for uid in users:
@@ -1159,7 +1148,8 @@ def handle_broadcast(message):
             bot.send_message(uid, broadcast_text, parse_mode='HTML')
             success += 1
             time.sleep(0.05)
-        except:
+        except Exception as e:
+            logger.warning("Broadcast failed for user %s: %s", uid, e)
             fail += 1
 
     bot.reply_to(message, f"\U0001f4e2 Broadcast Complete!\n\u2705 Success: {success}\n\u274c Failed: {fail}")
@@ -1209,11 +1199,11 @@ flask_thread = Thread(target=run_flask)
 flask_thread.daemon = True
 flask_thread.start()
 
-print("Bot is starting...")
+logger.info("Bot is starting...")
 while True:
     try:
         bot.remove_webhook()
         bot.polling(non_stop=True, interval=0, timeout=20)
     except Exception as e:
-        print(f"Polling error: {e}")
+        logger.error("Polling error: %s", e)
         time.sleep(5)

@@ -1,0 +1,13 @@
+# Environment variables (may contain secrets)
+.env
+
+# SQLite database files
+*.db
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
