@@ -108,7 +108,7 @@ function initCounters() {
 
             el.textContent = value.toLocaleString('en');
             if (progress < 1) requestAnimationFrame(step);
-            else el.textContent = target.toLocaleString('en') + (target === 99 ? '%' : '+');
+            else el.textContent = target.toLocaleString('en') + '+';
         };
 
         requestAnimationFrame(step);
@@ -260,6 +260,27 @@ function createConfetti() {
 
     const colors = ['#f5a623', '#ffd700', '#7c3aed', '#a78bfa', '#4ade80', '#ef4444', '#3b82f6'];
 
+    // Remove old confetti style if exists so new random values are generated
+    const oldStyle = document.getElementById('confetti-style');
+    if (oldStyle) oldStyle.remove();
+
+    let keyframes = '';
+    for (let i = 0; i < 50; i++) {
+        const tx = (Math.random() > 0.5 ? 1 : -1) * Math.random() * 100;
+        const rot = Math.random() * 720;
+        keyframes += `
+            @keyframes confetti-fall-${i} {
+                0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+                100% { transform: translateY(-200px) translateX(${tx.toFixed(1)}px) rotate(${rot.toFixed(0)}deg); opacity: 0; }
+            }
+        `;
+    }
+
+    const style = document.createElement('style');
+    style.id = 'confetti-style';
+    style.textContent = keyframes;
+    document.head.appendChild(style);
+
     for (let i = 0; i < 50; i++) {
         const piece = document.createElement('div');
         const color = colors[Math.floor(Math.random() * colors.length)];
@@ -272,22 +293,9 @@ function createConfetti() {
             left: ${Math.random() * 100}%;
             top: 50%;
             opacity: 0;
-            animation: confetti-fall ${Math.random() * 2 + 1}s ease-out ${Math.random() * 0.5}s forwards;
+            animation: confetti-fall-${i} ${Math.random() * 2 + 1}s ease-out ${Math.random() * 0.5}s forwards;
         `;
         container.appendChild(piece);
-    }
-
-    // Add confetti animation
-    if (!document.getElementById('confetti-style')) {
-        const style = document.createElement('style');
-        style.id = 'confetti-style';
-        style.textContent = `
-            @keyframes confetti-fall {
-                0% { transform: translateY(0) rotate(0deg); opacity: 1; }
-                100% { transform: translateY(-200px) translateX(${Math.random() > 0.5 ? '' : '-'}${Math.random() * 100}px) rotate(${Math.random() * 720}deg); opacity: 0; }
-            }
-        `;
-        document.head.appendChild(style);
     }
 }
 
