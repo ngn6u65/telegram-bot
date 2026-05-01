@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StarStore - شحن نجوم تيليجرام</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Animated Stars Background -->
+    <div class="stars-bg" id="starsBg"></div>
+    <div class="shooting-stars">
+        <div class="shooting-star"></div>
+        <div class="shooting-star"></div>
+        <div class="shooting-star"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <div class="container nav-container">
+            <a href="#" class="logo">
+                <span class="logo-icon">&#11088;</span>
+                <span class="logo-text">Star<span class="logo-highlight">Store</span></span>
+            </a>
+            <div class="nav-links" id="navLinks">
+                <a href="#home" class="nav-link active">الرئيسية</a>
+                <a href="#packages" class="nav-link">الباقات</a>
+                <a href="#how-it-works" class="nav-link">كيف يعمل</a>
+                <a href="#features" class="nav-link">المميزات</a>
+                <a href="#faq" class="nav-link">الأسئلة</a>
+            </div>
+            <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="القائمة">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <div class="container hero-container">
+            <div class="hero-content">
+                <div class="hero-badge">
+                    <span class="badge-icon">&#9889;</span>
+                    <span>الأسرع والأوفر في شحن النجوم</span>
+                </div>
+                <h1 class="hero-title">
+                    اشحن <span class="gradient-text">نجوم تيليجرام</span>
+                    <br>بأفضل الأسعار
+                </h1>
+                <p class="hero-description">
+                    منصة موثوقة وآمنة لشحن نجوم تيليجرام بأسعار تنافسية.
+                    شحن فوري، دعم على مدار الساعة، وضمان كامل.
+                </p>
+                <div class="hero-buttons">
+                    <a href="#packages" class="btn btn-primary btn-lg">
+                        <span>اشحن الآن</span>
+                        <span class="btn-icon">&#10024;</span>
+                    </a>
+                    <a href="#how-it-works" class="btn btn-glass btn-lg">
+                        <span>كيف يعمل؟</span>
+                        <span class="btn-icon">&#9654;</span>
+                    </a>
+                </div>
+                <div class="hero-stats">
+                    <div class="stat-item">
+                        <span class="stat-number" data-count="50000">0</span>
+                        <span class="stat-label">عملية شحن</span>
+                    </div>
+                    <div class="stat-divider"></div>
+                    <div class="stat-item">
+                        <span class="stat-number" data-count="12000">0</span>
+                        <span class="stat-label">عميل سعيد</span>
+                    </div>
+                    <div class="stat-divider"></div>
+                    <div class="stat-item">
+                        <span class="stat-number" data-count="99">0</span>
+                        <span class="stat-label">% رضا العملاء</span>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="hero-card">
+                    <div class="card-glow"></div>
+                    <div class="floating-stars">
+                        <span class="float-star s1">&#11088;</span>
+                        <span class="float-star s2">&#11088;</span>
+                        <span class="float-star s3">&#11088;</span>
+                        <span class="float-star s4">&#10024;</span>
+                        <span class="float-star s5">&#10024;</span>
+                    </div>
+                    <div class="hero-phone">
+                        <div class="phone-frame">
+                            <div class="phone-notch"></div>
+                            <div class="phone-screen">
+                                <div class="tg-header">
+                                    <span class="tg-logo">&#9992;</span>
+                                    <span>Telegram</span>
+                                </div>
+                                <div class="tg-balance">
+                                    <div class="balance-label">رصيدك من النجوم</div>
+                                    <div class="balance-amount">
+                                        <span class="balance-star">&#11088;</span>
+                                        <span class="balance-count" id="balanceCounter">2,500</span>
+                                    </div>
+                                </div>
+                                <div class="tg-actions">
+                                    <div class="tg-action-btn">&#10133; شحن</div>
+                                    <div class="tg-action-btn">&#127873; إهداء</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="hero-wave">
+            <svg viewBox="0 0 1440 120" preserveAspectRatio="none">
+                <path d="M0,60 C360,120 720,0 1080,60 C1260,90 1380,30 1440,60 L1440,120 L0,120 Z" fill="rgba(10,10,30,0.8)"/>
+            </svg>
+        </div>
+    </section>
+
+    <!-- Packages Section -->
+    <section class="packages" id="packages">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge">&#11088; باقات الشحن</span>
+                <h2 class="section-title">اختر باقتك المفضلة</h2>
+                <p class="section-desc">أسعار تنافسية وشحن فوري لنجوم تيليجرام</p>
+            </div>
+            <div class="packages-grid">
+                <!-- Package 1 -->
+                <div class="package-card" data-aos="fade-up">
+                    <div class="package-header">
+                        <div class="package-stars-icon">&#11088;</div>
+                        <h3 class="package-name">باقة البداية</h3>
+                    </div>
+                    <div class="package-amount">
+                        <span class="amount-number">50</span>
+                        <span class="amount-label">نجمة</span>
+                    </div>
+                    <div class="package-price">
+                        <span class="price-currency">$</span>
+                        <span class="price-value">0.99</span>
+                    </div>
+                    <ul class="package-features">
+                        <li><span class="feature-icon">&#10003;</span> شحن فوري</li>
+                        <li><span class="feature-icon">&#10003;</span> دعم 24/7</li>
+                        <li><span class="feature-icon">&#10003;</span> ضمان كامل</li>
+                    </ul>
+                    <button class="btn btn-outline btn-block package-btn" data-stars="50" data-price="0.99">
+                        اشحن الآن
+                    </button>
+                </div>
+
+                <!-- Package 2 -->
+                <div class="package-card" data-aos="fade-up" data-aos-delay="100">
+                    <div class="package-header">
+                        <div class="package-stars-icon">&#11088;&#11088;</div>
+                        <h3 class="package-name">الباقة الفضية</h3>
+                    </div>
+                    <div class="package-amount">
+                        <span class="amount-number">150</span>
+                        <span class="amount-label">نجمة</span>
+                    </div>
+                    <div class="package-price">
+                        <span class="price-currency">$</span>
+                        <span class="price-value">2.49</span>
+                    </div>
+                    <div class="package-save">وفر 17%</div>
+                    <ul class="package-features">
+                        <li><span class="feature-icon">&#10003;</span> شحن فوري</li>
+                        <li><span class="feature-icon">&#10003;</span> دعم 24/7</li>
+                        <li><span class="feature-icon">&#10003;</span> ضمان كامل</li>
+                    </ul>
+                    <button class="btn btn-outline btn-block package-btn" data-stars="150" data-price="2.49">
+                        اشحن الآن
+                    </button>
+                </div>
+
+                <!-- Package 3 - Popular -->
+                <div class="package-card popular" data-aos="fade-up" data-aos-delay="200">
+                    <div class="popular-badge">&#128293; الأكثر شعبية</div>
+                    <div class="package-header">
+                        <div class="package-stars-icon">&#11088;&#11088;&#11088;</div>
+                        <h3 class="package-name">الباقة الذهبية</h3>
+                    </div>
+                    <div class="package-amount">
+                        <span class="amount-number">500</span>
+                        <span class="amount-label">نجمة</span>
+                    </div>
+                    <div class="package-price">
+                        <span class="price-currency">$</span>
+                        <span class="price-value">7.49</span>
+                    </div>
+                    <div class="package-save">وفر 25%</div>
+                    <ul class="package-features">
+                        <li><span class="feature-icon">&#10003;</span> شحن فوري</li>
+                        <li><span class="feature-icon">&#10003;</span> دعم أولوية</li>
+                        <li><span class="feature-icon">&#10003;</span> ضمان كامل</li>
+                        <li><span class="feature-icon">&#10003;</span> بونص 50 نجمة</li>
+                    </ul>
+                    <button class="btn btn-primary btn-block package-btn" data-stars="500" data-price="7.49">
+                        اشحن الآن &#10024;
+                    </button>
+                </div>
+
+                <!-- Package 4 -->
+                <div class="package-card" data-aos="fade-up" data-aos-delay="300">
+                    <div class="package-header">
+                        <div class="package-stars-icon">&#11088;&#11088;&#11088;&#11088;</div>
+                        <h3 class="package-name">الباقة البلاتينية</h3>
+                    </div>
+                    <div class="package-amount">
+                        <span class="amount-number">1000</span>
+                        <span class="amount-label">نجمة</span>
+                    </div>
+                    <div class="package-price">
+                        <span class="price-currency">$</span>
+                        <span class="price-value">13.99</span>
+                    </div>
+                    <div class="package-save">وفر 30%</div>
+                    <ul class="package-features">
+                        <li><span class="feature-icon">&#10003;</span> شحن فوري</li>
+                        <li><span class="feature-icon">&#10003;</span> دعم VIP</li>
+                        <li><span class="feature-icon">&#10003;</span> ضمان كامل</li>
+                        <li><span class="feature-icon">&#10003;</span> بونص 150 نجمة</li>
+                    </ul>
+                    <button class="btn btn-outline btn-block package-btn" data-stars="1000" data-price="13.99">
+                        اشحن الآن
+                    </button>
+                </div>
+
+                <!-- Package 5 -->
+                <div class="package-card premium" data-aos="fade-up" data-aos-delay="400">
+                    <div class="premium-badge">&#128081; VIP</div>
+                    <div class="package-header">
+                        <div class="package-stars-icon">&#11088;&#11088;&#11088;&#11088;&#11088;</div>
+                        <h3 class="package-name">باقة الماسية</h3>
+                    </div>
+                    <div class="package-amount">
+                        <span class="amount-number">2500</span>
+                        <span class="amount-label">نجمة</span>
+                    </div>
+                    <div class="package-price">
+                        <span class="price-currency">$</span>
+                        <span class="price-value">29.99</span>
+                    </div>
+                    <div class="package-save">وفر 40%</div>
+                    <ul class="package-features">
+                        <li><span class="feature-icon">&#10003;</span> شحن فوري</li>
+                        <li><span class="feature-icon">&#10003;</span> دعم VIP مخصص</li>
+                        <li><span class="feature-icon">&#10003;</span> ضمان كامل</li>
+                        <li><span class="feature-icon">&#10003;</span> بونص 500 نجمة</li>
+                        <li><span class="feature-icon">&#10003;</span> خصم دائم 10%</li>
+                    </ul>
+                    <button class="btn btn-primary btn-block package-btn" data-stars="2500" data-price="29.99">
+                        اشحن الآن &#128081;
+                    </button>
+                </div>
+
+                <!-- Package 6 -->
+                <div class="package-card" data-aos="fade-up" data-aos-delay="500">
+                    <div class="package-header">
+                        <div class="package-stars-icon">&#127775;</div>
+                        <h3 class="package-name">باقة مخصصة</h3>
+                    </div>
+                    <div class="custom-package-form">
+                        <label class="custom-label">أدخل عدد النجوم</label>
+                        <div class="custom-input-wrap">
+                            <span class="input-icon">&#11088;</span>
+                            <input type="number" id="customStars" class="custom-input" min="10" max="100000" placeholder="مثال: 3000">
+                        </div>
+                        <div class="custom-price" id="customPrice">
+                            <span>السعر: </span>
+                            <span id="customPriceValue">$0.00</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-glass btn-block package-btn" id="customPackageBtn">
+                        احسب واشحن
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="how-it-works" id="how-it-works">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge">&#128640; كيف يعمل</span>
+                <h2 class="section-title">ثلاث خطوات بسيطة</h2>
+                <p class="section-desc">اشحن نجوم تيليجرام في أقل من دقيقة</p>
+            </div>
+            <div class="steps-grid">
+                <div class="step-card" data-aos="fade-up">
+                    <div class="step-number">1</div>
+                    <div class="step-icon">&#128230;</div>
+                    <h3 class="step-title">اختر الباقة</h3>
+                    <p class="step-desc">اختر عدد النجوم اللي تبي تشحنها من الباقات المتاحة أو حدد عدد مخصص</p>
+                </div>
+                <div class="step-connector">
+                    <div class="connector-line"></div>
+                    <div class="connector-arrow">&#10148;</div>
+                </div>
+                <div class="step-card" data-aos="fade-up" data-aos-delay="200">
+                    <div class="step-number">2</div>
+                    <div class="step-icon">&#128179;</div>
+                    <h3 class="step-title">ادفع بأمان</h3>
+                    <p class="step-desc">اختر طريقة الدفع المناسبة وأكمل عملية الدفع بشكل آمن ومشفر</p>
+                </div>
+                <div class="step-connector">
+                    <div class="connector-line"></div>
+                    <div class="connector-arrow">&#10148;</div>
+                </div>
+                <div class="step-card" data-aos="fade-up" data-aos-delay="400">
+                    <div class="step-number">3</div>
+                    <div class="step-icon">&#11088;</div>
+                    <h3 class="step-title">استلم النجوم</h3>
+                    <p class="step-desc">يتم شحن النجوم فورياً لحسابك على تيليجرام خلال ثواني معدودة</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section class="features" id="features">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge">&#10024; المميزات</span>
+                <h2 class="section-title">لماذا تختارنا؟</h2>
+                <p class="section-desc">نقدم لك أفضل خدمة شحن نجوم تيليجرام</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card" data-aos="fade-up">
+                    <div class="feature-icon-wrap">
+                        <span>&#9889;</span>
+                    </div>
+                    <h3>شحن فوري</h3>
+                    <p>يتم شحن النجوم خلال ثواني معدودة بعد تأكيد الدفع</p>
+                </div>
+                <div class="feature-card" data-aos="fade-up" data-aos-delay="100">
+                    <div class="feature-icon-wrap">
+                        <span>&#128274;</span>
+                    </div>
+                    <h3>آمن 100%</h3>
+                    <p>جميع المعاملات مشفرة ومحمية بأعلى معايير الأمان</p>
+                </div>
+                <div class="feature-card" data-aos="fade-up" data-aos-delay="200">
+                    <div class="feature-icon-wrap">
+                        <span>&#128176;</span>
+                    </div>
+                    <h3>أسعار تنافسية</h3>
+                    <p>أفضل الأسعار في السوق مع خصومات وعروض مستمرة</p>
+                </div>
+                <div class="feature-card" data-aos="fade-up" data-aos-delay="300">
+                    <div class="feature-icon-wrap">
+                        <span>&#128172;</span>
+                    </div>
+                    <h3>دعم فني 24/7</h3>
+                    <p>فريق دعم متخصص جاهز لمساعدتك في أي وقت</p>
+                </div>
+                <div class="feature-card" data-aos="fade-up" data-aos-delay="400">
+                    <div class="feature-icon-wrap">
+                        <span>&#127873;</span>
+                    </div>
+                    <h3>بونص إضافي</h3>
+                    <p>احصل على نجوم إضافية مجانية مع الباقات الكبيرة</p>
+                </div>
+                <div class="feature-card" data-aos="fade-up" data-aos-delay="500">
+                    <div class="feature-icon-wrap">
+                        <span>&#128101;</span>
+                    </div>
+                    <h3>نظام إحالة</h3>
+                    <p>ادعو أصدقائك واربح نجوم مجانية مع كل إحالة ناجحة</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="testimonials">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge">&#128172; آراء العملاء</span>
+                <h2 class="section-title">ماذا يقول عملاؤنا</h2>
+            </div>
+            <div class="testimonials-slider" id="testimonialsSlider">
+                <div class="testimonial-card">
+                    <div class="testimonial-stars">&#11088;&#11088;&#11088;&#11088;&#11088;</div>
+                    <p class="testimonial-text">"خدمة ممتازة وسريعة! شحنت 1000 نجمة وتم التوصيل في أقل من دقيقة. أنصح الكل فيها."</p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">أ</div>
+                        <div class="author-info">
+                            <span class="author-name">أحمد محمد</span>
+                            <span class="author-role">عميل منذ 2024</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-stars">&#11088;&#11088;&#11088;&#11088;&#11088;</div>
+                    <p class="testimonial-text">"أفضل موقع لشحن نجوم تيليجرام! الأسعار ممتازة والدعم الفني رائع. استخدمته أكثر من 10 مرات."</p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">س</div>
+                        <div class="author-info">
+                            <span class="author-name">سارة علي</span>
+                            <span class="author-role">عميلة VIP</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-stars">&#11088;&#11088;&#11088;&#11088;&#11088;</div>
+                    <p class="testimonial-text">"موثوق وسريع. جربت مواقع كثيرة وهذا أفضلهم بفرق كبير. البونص الإضافي شي خرافي!"</p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">خ</div>
+                        <div class="author-info">
+                            <span class="author-name">خالد عمر</span>
+                            <span class="author-role">عميل دائم</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="faq" id="faq">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge">&#10068; أسئلة شائعة</span>
+                <h2 class="section-title">الأسئلة الشائعة</h2>
+            </div>
+            <div class="faq-list">
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>ما هي نجوم تيليجرام؟</span>
+                        <span class="faq-icon">+</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>نجوم تيليجرام (Telegram Stars) هي عملة رقمية داخل تيليجرام تستخدم لشراء المحتوى الرقمي، الاشتراكات، والخدمات داخل التطبيق. يمكنك استخدامها لدعم القنوات والبوتات والمبدعين.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>كم يستغرق الشحن؟</span>
+                        <span class="faq-icon">+</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>يتم الشحن فورياً بعد تأكيد الدفع. في معظم الحالات تصل النجوم خلال ثواني معدودة، وفي حالات نادرة قد يستغرق الأمر حتى 5 دقائق.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>ما هي طرق الدفع المتاحة؟</span>
+                        <span class="faq-icon">+</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>نقبل العديد من طرق الدفع بما في ذلك البطاقات البنكية (Visa/Mastercard)، العملات الرقمية، المحافظ الإلكترونية، والتحويل البنكي.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>هل الخدمة آمنة؟</span>
+                        <span class="faq-icon">+</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>نعم، جميع المعاملات مشفرة بتقنية SSL 256-bit ونستخدم أعلى معايير الأمان. لا نحتفظ بأي معلومات بنكية على خوادمنا.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>هل يوجد حد أدنى أو أقصى للشحن؟</span>
+                        <span class="faq-icon">+</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>الحد الأدنى هو 50 نجمة والحد الأقصى هو 100,000 نجمة لكل عملية. يمكنك إجراء عمليات متعددة إذا كنت تحتاج لعدد أكبر.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>ماذا لو لم أستلم النجوم؟</span>
+                        <span class="faq-icon">+</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>في حالة نادرة عدم وصول النجوم، تواصل مع فريق الدعم وسنقوم بإعادة الشحن أو استرداد المبلغ كاملاً خلال 24 ساعة.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="container">
+            <div class="cta-card">
+                <div class="cta-glow"></div>
+                <h2>جاهز تشحن نجومك؟ &#11088;</h2>
+                <p>ابدأ الآن واحصل على بونص 10% على أول عملية شحن!</p>
+                <a href="#packages" class="btn btn-primary btn-lg">
+                    ابدأ الشحن الآن &#128640;
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <a href="#" class="logo">
+                        <span class="logo-icon">&#11088;</span>
+                        <span class="logo-text">Star<span class="logo-highlight">Store</span></span>
+                    </a>
+                    <p>منصتك الموثوقة لشحن نجوم تيليجرام بأفضل الأسعار وأسرع خدمة.</p>
+                    <div class="social-links">
+                        <a href="#" class="social-link" aria-label="تيليجرام">&#9992;</a>
+                        <a href="#" class="social-link" aria-label="انستجرام">&#128247;</a>
+                        <a href="#" class="social-link" aria-label="تويتر">&#128038;</a>
+                    </div>
+                </div>
+                <div class="footer-links">
+                    <h4>روابط سريعة</h4>
+                    <ul>
+                        <li><a href="#home">الرئيسية</a></li>
+                        <li><a href="#packages">الباقات</a></li>
+                        <li><a href="#how-it-works">كيف يعمل</a></li>
+                        <li><a href="#features">المميزات</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>الدعم</h4>
+                    <ul>
+                        <li><a href="#faq">الأسئلة الشائعة</a></li>
+                        <li><a href="#">سياسة الخصوصية</a></li>
+                        <li><a href="#">شروط الاستخدام</a></li>
+                        <li><a href="#">تواصل معنا</a></li>
+                    </ul>
+                </div>
+                <div class="footer-contact">
+                    <h4>تواصل معنا</h4>
+                    <a href="#" class="contact-btn">
+                        <span>&#9992;</span>
+                        <span>تواصل عبر تيليجرام</span>
+                    </a>
+                    <p class="footer-note">متاحين 24/7 لخدمتك</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024-2025 StarStore. جميع الحقوق محفوظة.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Order Modal -->
+    <div class="modal-overlay" id="orderModal">
+        <div class="modal-content">
+            <button class="modal-close" id="modalClose">&times;</button>
+            <div class="modal-header">
+                <h2>&#11088; تأكيد الطلب</h2>
+            </div>
+            <div class="modal-body">
+                <div class="order-summary">
+                    <div class="order-item">
+                        <span class="order-label">عدد النجوم:</span>
+                        <span class="order-value" id="modalStars">500</span>
+                    </div>
+                    <div class="order-item">
+                        <span class="order-label">البونص:</span>
+                        <span class="order-value bonus" id="modalBonus">+50 نجمة</span>
+                    </div>
+                    <div class="order-divider"></div>
+                    <div class="order-item total">
+                        <span class="order-label">المجموع:</span>
+                        <span class="order-value" id="modalTotal">$7.49</span>
+                    </div>
+                </div>
+                <form class="order-form" id="orderForm">
+                    <div class="form-group">
+                        <label>اسم المستخدم على تيليجرام</label>
+                        <div class="input-wrap">
+                            <span class="input-prefix">@</span>
+                            <input type="text" id="telegramUsername" placeholder="username" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>معرف تيليجرام (اختياري)</label>
+                        <input type="text" id="telegramId" placeholder="مثال: 123456789">
+                    </div>
+                    <div class="form-group">
+                        <label>طريقة الدفع</label>
+                        <div class="payment-methods">
+                            <label class="payment-option">
+                                <input type="radio" name="payment" value="card" checked>
+                                <span class="payment-card">
+                                    <span class="payment-icon">&#128179;</span>
+                                    <span>بطاقة بنكية</span>
+                                </span>
+                            </label>
+                            <label class="payment-option">
+                                <input type="radio" name="payment" value="crypto">
+                                <span class="payment-card">
+                                    <span class="payment-icon">&#9878;</span>
+                                    <span>عملة رقمية</span>
+                                </span>
+                            </label>
+                            <label class="payment-option">
+                                <input type="radio" name="payment" value="wallet">
+                                <span class="payment-card">
+                                    <span class="payment-icon">&#128091;</span>
+                                    <span>محفظة إلكترونية</span>
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block btn-lg">
+                        &#128274; أكمل الدفع الآمن
+                    </button>
+                    <p class="form-note">&#128274; معاملة مشفرة وآمنة 100%</p>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div class="modal-overlay" id="successModal">
+        <div class="modal-content success-modal">
+            <div class="success-animation">
+                <div class="success-circle">
+                    <span class="success-icon">&#10003;</span>
+                </div>
+                <div class="confetti-container" id="confetti"></div>
+            </div>
+            <h2>تم الطلب بنجاح! &#127881;</h2>
+            <p>سيتم شحن النجوم لحسابك خلال لحظات</p>
+            <div class="success-details">
+                <div class="detail-row">
+                    <span>رقم الطلب:</span>
+                    <span id="orderNumber">#ST-00000</span>
+                </div>
+                <div class="detail-row">
+                    <span>الحالة:</span>
+                    <span class="status-badge">قيد المعالجة</span>
+                </div>
+            </div>
+            <button class="btn btn-primary btn-lg" onclick="closeSuccessModal()">حسناً &#128077;</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
