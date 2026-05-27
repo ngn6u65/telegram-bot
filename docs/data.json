@@ -1,0 +1,29 @@
+{
+  "site": {
+    "title": "My Telegram Hub",
+    "description": "All my Telegram Bots & Channels in one place — never lose them!",
+    "owner": "Masha"
+  },
+  "bots": [
+    {
+      "id": 1,
+      "name": "Video Bot",
+      "description": "Buy and watch exclusive videos via Telegram Stars",
+      "username": "YourVideoBot",
+      "icon": "🤖",
+      "category": "Entertainment",
+      "is_active": true
+    }
+  ],
+  "channels": [
+    {
+      "id": 1,
+      "name": "Updates Channel",
+      "description": "Follow the latest updates and news",
+      "username": "YourChannel",
+      "icon": "📢",
+      "category": "News",
+      "is_active": true
+    }
+  ]
+}

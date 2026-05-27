@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel — Telegram Hub</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚙️</text></svg>">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="admin-page">
+
+  <!-- Background Effects -->
+  <div class="bg-effects">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+  </div>
+
+  <!-- Admin Header -->
+  <header class="admin-header">
+    <div class="container">
+      <div class="admin-title">⚙️ Admin Panel</div>
+      <div style="display:flex;gap:12px;align-items:center;">
+        <a href="index.html" class="back-btn">← Back to Site</a>
+        <button class="btn btn-danger btn-sm" onclick="logout()" id="logout-btn" style="display:none;">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Login Section -->
+  <section id="login-section" class="login-section">
+    <div class="login-card fade-in">
+      <div style="font-size:48px;margin-bottom:16px;">🔐</div>
+      <h2>Admin Access</h2>
+      <p>Enter your password to manage bots & channels</p>
+      <form id="login-form">
+        <div class="form-group">
+          <label for="admin-password">Password</label>
+          <input type="password" id="admin-password" class="form-input" placeholder="Enter admin password" autocomplete="off" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Login</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- Admin Panel -->
+  <div id="admin-panel" class="admin-panel container">
+
+    <!-- Bots Management -->
+    <div class="admin-section fade-in">
+      <div class="admin-section-header">
+        <h3>🤖 Manage Bots</h3>
+        <button class="btn btn-primary btn-sm" onclick="openAddModal('bots')">+ Add Bot</button>
+      </div>
+      <div class="admin-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Username</th>
+              <th>Category</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="bots-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Channels Management -->
+    <div class="admin-section fade-in" style="animation-delay:0.1s;">
+      <div class="admin-section-header">
+        <h3>📢 Manage Channels</h3>
+        <button class="btn btn-primary btn-sm" onclick="openAddModal('channels')">+ Add Channel</button>
+      </div>
+      <div class="admin-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Username</th>
+              <th>Category</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="channels-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Export Section -->
+    <div class="admin-section fade-in" id="export-section" style="display:none; animation-delay:0.2s;">
+      <div class="admin-section-header">
+        <h3>📦 Export Changes</h3>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-secondary btn-sm" onclick="copyExportData()">📋 Copy JSON</button>
+          <button class="btn btn-primary btn-sm" onclick="downloadExportData()">⬇️ Download data.json</button>
+        </div>
+      </div>
+      <p style="color:var(--text-secondary);font-size:14px;margin-bottom:12px;">
+        Download the updated <code style="background:var(--bg-card);padding:2px 6px;border-radius:4px;">data.json</code> and replace it in your repo's <code style="background:var(--bg-card);padding:2px 6px;border-radius:4px;">docs/</code> folder, then push to update the live site.
+      </p>
+      <textarea id="export-json" class="form-input" style="min-height:200px;font-family:monospace;font-size:12px;" readonly></textarea>
+    </div>
+
+  </div>
+
+  <!-- Add/Edit Modal -->
+  <div id="modal-overlay" class="modal-overlay" onclick="if(event.target===this) closeModal()">
+    <div class="modal">
+      <h3 id="modal-title">Add Item</h3>
+      <div class="form-group">
+        <label for="item-name">Name *</label>
+        <input type="text" id="item-name" class="form-input" placeholder="e.g. My Cool Bot">
+      </div>
+      <div class="form-group">
+        <label for="item-username">Telegram Username * (without @)</label>
+        <input type="text" id="item-username" class="form-input" placeholder="e.g. MyCoolBot">
+      </div>
+      <div class="form-group">
+        <label for="item-description">Description</label>
+        <textarea id="item-description" class="form-input" placeholder="What does this bot/channel do?"></textarea>
+      </div>
+      <div class="form-group">
+        <label for="item-icon">Emoji Icon</label>
+        <input type="text" id="item-icon" class="form-input" placeholder="🤖" maxlength="4">
+      </div>
+      <div class="form-group">
+        <label for="item-category">Category</label>
+        <input type="text" id="item-category" class="form-input" placeholder="e.g. Entertainment, News, Tools">
+      </div>
+      <div class="form-group" style="display:flex;align-items:center;gap:10px;">
+        <input type="checkbox" id="item-active" checked style="width:18px;height:18px;accent-color:var(--accent);">
+        <label for="item-active" style="margin:0;cursor:pointer;">Active (visible on site)</label>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="saveItem()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/admin.js"></script>
+  <script>
+    // Show logout button when logged in
+    const observer = new MutationObserver(() => {
+      const panel = document.getElementById('admin-panel');
+      const logoutBtn = document.getElementById('logout-btn');
+      if (panel.classList.contains('active') && logoutBtn) {
+        logoutBtn.style.display = 'inline-flex';
+      }
+    });
+    observer.observe(document.getElementById('admin-panel'), { attributes: true });
+  </script>
+</body>
+</html>
